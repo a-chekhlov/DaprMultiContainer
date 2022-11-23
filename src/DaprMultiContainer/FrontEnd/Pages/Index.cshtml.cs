@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dapr.Client;
+using FrontEnd.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FrontEnd.Pages
@@ -6,15 +7,23 @@ namespace FrontEnd.Pages
 	public class IndexModel : PageModel
 	{
 		private readonly ILogger<IndexModel> _logger;
+		private readonly DaprClient _daprClient;
 
-		public IndexModel(ILogger<IndexModel> logger)
+		public IndexModel(ILogger<IndexModel> logger, DaprClient _daprClient)
 		{
 			_logger = logger;
+			this._daprClient = _daprClient;
 		}
 
-		public void OnGet()
+		public async Task OnGet()
 		{
+			var forecasts = await
+				_daprClient.InvokeMethodAsync<IEnumerable<WeatherForecast>>(
+					HttpMethod.Get,
+					"BackEnd",
+					"weatherforecast");
 
+			ViewData["WeatherForecastData"] = forecasts;
 		}
 	}
 }
